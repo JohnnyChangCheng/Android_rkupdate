@@ -1,7 +1,9 @@
 #include "RKAndroidDevice.h"
+#include <iostream>
 #define tole(x)		(x)
 /*factor is 0xedb88320*/
 bool CRKAndroidDevice::bGptFlag = 0;
+extern int sdBootUpdate;
 unsigned int crc32table_le[] = {
 	tole(0x00000000L), tole(0x77073096L), tole(0xee0e612cL), tole(0x990951baL),
 	tole(0x076dc419L), tole(0x706af48fL), tole(0xe963a535L), tole(0x9e6495a3L),
@@ -90,7 +92,7 @@ CHAR CRKAndroidDevice::FindIDBlock(char pos,char &IDBlockPos)
 			{
 				m_pLog->Record(_T("ERROR:FindIDBlock-->RKU_ReadSector %x failed,RetCode(%d)"),i*m_flashInfo.uiSectorPerBlock,iRet);
 			}
-			return -1;//Êý¾Ý¶ÁÈ¡Ê§°Ü
+			return -1;//ï¿½ï¿½ï¿½Ý¶ï¿½È¡Ê§ï¿½ï¿½
 		}
 		RKANDROID_IDB_SEC0 *pSec0;
 		pSec0 = (RKANDROID_IDB_SEC0 *)bData;
@@ -98,17 +100,17 @@ CHAR CRKAndroidDevice::FindIDBlock(char pos,char &IDBlockPos)
  //       if (bData[514]==0x69)//0x69='i'
 		if (pSec0->dwTag==0x0FF0AA55)
 		{
-			//Ôö¼ÓÅÐ¶Ïtag
+			//ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½tag
 			RKANDROID_IDB_SEC1 *pSec;
 			pSec = (RKANDROID_IDB_SEC1 *)(bData+SECTOR_SIZE);
 			if (pSec->uiChipTag==0x38324B52)
 			{
 				IDBlockPos = i;
-				return 0;//ÕÒµ½idb
+				return 0;//ï¿½Òµï¿½idb
 			}
 			else
 			{
-				continue;//tag²»¶Ô
+				continue;//tagï¿½ï¿½ï¿½ï¿½
 			}
 		}
 
@@ -154,9 +156,10 @@ bool CRKAndroidDevice::ReserveIDBlock(char iBlockIndex,char iIdblockPos)
 bool CRKAndroidDevice::CalcIDBCount()
 {
 	bool bRet;
-	UINT uiIdSectorNum;//ID BLOCK»ù±¾Çø
+	UINT uiIdSectorNum;//ID BLOCKï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	bRet = GetLoaderSize();
+	std::cout << "!!!!!!!!!!!" <<bRet <<std::endl;
 	if (!bRet)
 	{
 		if (m_pLog)
@@ -185,7 +188,7 @@ bool CRKAndroidDevice::OffsetIDBlock(char pos)
 	int iBlockIndex,i;
 	for ( i=0;i<m_flashInfo.usPhyBlokcPerIDB;i++)
 	{
-		m_flashInfo.blockState[m_idBlockOffset[pos]+i]=1;//±ê¼ÇÉÏ»µ¿é
+		m_flashInfo.blockState[m_idBlockOffset[pos]+i]=1;//ï¿½ï¿½ï¿½ï¿½Ï»ï¿½ï¿½ï¿½
 	}
 	iBlockIndex = m_idBlockOffset[pos]+m_flashInfo.usPhyBlokcPerIDB;
 	for(i=pos; i<5; i++)
@@ -305,7 +308,7 @@ bool CRKAndroidDevice::GetOldSectorData()
 		{
 			m_pLog->Record(_T("ERROR:GetOldSectorData-->GetWriteBackData failed"));
 		}
-		return false;//Êý¾Ý¶ÁÈ¡Ê§°Ü
+		return false;//ï¿½ï¿½ï¿½Ý¶ï¿½È¡Ê§ï¿½ï¿½
 	}
 	PBYTE pSec;
 	if (!m_oldSec0)
@@ -554,7 +557,7 @@ int CRKAndroidDevice::MakeIDBlockData(PBYTE lpIDBlock)
 		return -5;
 	}
 
-	////////////// Éú³ÉÊý¾Ý ////////////////////////////////////////////
+	////////////// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ////////////////////////////////////////////
 	UINT i;
 	MakeSector0((PBYTE)&sector0Info);
 	MakeSector1((PBYTE)&sector1Info);
@@ -634,8 +637,8 @@ bool CRKAndroidDevice::MakeSpareData(PBYTE lpIDBlock,DWORD dwSectorNum,PBYTE lpS
 		bchInBuf[514] = ((i==0) ? 'i' : 0xff);
 		bchInBuf[512] = 0xff;
 		bchInBuf[513] = 0xff;
-		//¶ÔbchInBuf½øÐÐBCH±àÂë£¨Éú³É13¸ö×Ö½ÚµÄ±àÂë£©£¬Éú³ÉµÄbchOutBuf(528 Bytes)
-		//ÓÉbchInBuf(515 Bytes)ÓëBCH±àÂë(13 Bytes)×é³É
+		//ï¿½ï¿½bchInBufï¿½ï¿½ï¿½ï¿½BCHï¿½ï¿½ï¿½ë£¨ï¿½ï¿½ï¿½ï¿½13ï¿½ï¿½ï¿½Ö½ÚµÄ±ï¿½ï¿½ë£©ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½bchOutBuf(528 Bytes)
+		//ï¿½ï¿½bchInBuf(515 Bytes)ï¿½ï¿½BCHï¿½ï¿½ï¿½ï¿½(13 Bytes)ï¿½ï¿½ï¿½
 		bch_encode(bchInBuf, bchOutBuf);
 		memcpy(lpSpareBuffer+i*16+3, bchOutBuf+515, 13);
 	}
@@ -648,46 +651,39 @@ int CRKAndroidDevice::WriteIDBlock(PBYTE lpIDBlock,DWORD dwSectorNum,bool bErase
 	if (m_pLog)
 	{
 		m_pLog->Record(_T("INFO:WriteIDBlock in"));
+		m_pLog->Record(_T("INFO:---------------------"));
 	}
-	STRUCT_END_WRITE_SECTOR end_write_sector_data;
-	BYTE writeBuf[8*SECTOR_SIZE];
-	UINT uiOffset,uiTotal,uiWriteByte,uiCrc;
-	int iRet,i,nTryCount=3;
-	uiTotal = dwSectorNum*SECTOR_SIZE;
-	uiCrc = CRC_32(lpIDBlock,uiTotal);
-	end_write_sector_data.uiSize = uiTotal;
-	end_write_sector_data.uiCrc = uiCrc;
-	for(i=0;i<5;i++)
-		end_write_sector_data.uiBlock[i] = m_idBlockOffset[i];
-	while (nTryCount>0)
-	{
-		uiOffset = 0;
-		uiTotal = dwSectorNum * SECTOR_SIZE;
-		while (uiTotal>0)
-		{
-			if (uiTotal>=2048)
-				uiWriteByte = 2048;
-			else
-				uiWriteByte = uiTotal;
 
-			memcpy(writeBuf+8,lpIDBlock+uiOffset,uiWriteByte);
-			iRet = m_pComm->RKU_WriteSector(uiOffset,uiWriteByte,writeBuf);
-			if (iRet!=ERR_SUCCESS)
+	UINT uiBufferSize=16*1024;
+	int iRet,i,nTryCount=3;
+	UINT uiTotal;
+	uiTotal = dwSectorNum*SECTOR_SIZE;
+
+	while (nTryCount > 0)
+	{
+		m_pLog->Record(_T("dwSectorNum=%d"),dwSectorNum);
+		m_pLog->Record(_T("uiTotal=%d\n"),uiTotal);
+
+		//iRet = m_pComm->RKU_EndWriteSector((BYTE*)&end_write_sector_data);
+		for(i = 0; i <= 4; i++)
+		{
+			iRet = m_pComm->RKU_LoaderWriteLBA(64 + i * 1024, dwSectorNum, lpIDBlock);
+			if (iRet != ERR_SUCCESS)
 			{
 				if (m_pLog)
 					m_pLog->Record(_T("ERROR:WriteIDBlock-->RKU_WriteSector failed!"));
 				return -1;
 			}
-			uiOffset += uiWriteByte;
-			uiTotal -= uiWriteByte;
 		}
-		iRet = m_pComm->RKU_EndWriteSector((BYTE*)&end_write_sector_data);
-		if (iRet==ERR_SUCCESS)
+
+		if (iRet == ERR_SUCCESS)
 			break;
 		nTryCount--;
 	}
-	if (nTryCount<=0)
+
+	if (nTryCount <= 0)
 		return -2;
+
 	if (m_pLog)
 	{
 		m_pLog->Record(_T("INFO:WriteIDBlock out"));
@@ -704,6 +700,8 @@ int CRKAndroidDevice::
 	string strInfo="";
 	char szTmp[32];
 	bool bFirstCS=false;
+
+#if 0   //chad.ma closed 2018/09/27
 	for(i=0; i<8; i++)
 	{
 		if( m_flashInfo.bFlashCS&(1<<i) )
@@ -742,8 +740,6 @@ int CRKAndroidDevice::
 	{
 		m_pLog->Record(_T("ERROR:PrepareIDB-->IDblock count=%d."),m_oldIDBCounts);
 	}
-
-
 
 	memset(m_backupBuffer,0,SECTOR_SIZE);
 
@@ -808,6 +804,8 @@ int CRKAndroidDevice::
 			return -4;
 		}
 	}
+#endif
+
 	if ( !CalcIDBCount() )
 	{
 		if (m_pLog)
@@ -860,7 +858,7 @@ int CRKAndroidDevice::DownloadIDBlock()
 		}
 		return -2;
 	}
-
+	printf("!!!!!!!!!!!!idb sectors %d\n",dwSectorNum);
 	iRet = WriteIDBlock(pIDBData,dwSectorNum,false);
 	delete []pIDBData;
 	if (iRet==0)
@@ -873,7 +871,7 @@ int CRKAndroidDevice::DownloadIDBlock()
 		{
 			m_pLog->Record(_T("ERROR:DownloadIDBlock-->WriteIDBlock failed,RetCode(%d)"),iRet);
 		}
-		BufferWriteBack();
+		//BufferWriteBack();
 		return -3;
 	}
 
@@ -940,10 +938,11 @@ int CRKAndroidDevice::DownloadImage()
 				if (strcmp(rkImageHead.item[i].name, PARTNAME_RECOVERY) == 0
 					|| strcmp(rkImageHead.item[i].name, PARTNAME_MISC) == 0)
 				{
-					//if find "recovery" or "misc" partition, we ignore,
-					//recovery.img update processimg in main system.
-					//misc.img not process here.
-					continue;
+					if (!sdBootUpdate)
+						//if find "recovery" or "misc" partition, we ignore,
+						//recovery.img update processimg in main system.
+						//misc.img not process here.
+						continue;
 				}
 
 				if (rkImageHead.item[i].file[55]=='H')
@@ -979,6 +978,8 @@ int CRKAndroidDevice::DownloadImage()
 	}
 	GptFlag = GetParameterGptFlag(rkImageHead.item[iParamPos]);
 	bGptFlag = GptFlag;
+    printf(">>>>>>>> bGptFlag = %d, lineno = %d\n", bGptFlag,__LINE__);
+    printf(">>>>>>>> CRKAndroidDevice::bGptFlag = %d \n", CRKAndroidDevice::bGptFlag);
 	if (!GptFlag)
 	{
 		if (!CheckParamPartSize(rkImageHead,iParamPos))
@@ -1014,7 +1015,7 @@ int CRKAndroidDevice::DownloadImage()
 			}
 			if (GptFlag)
 			{
-			   m_pLog->Record(_T("########### RKA_Gpt_Download #########\n"));
+				m_pLog->Record(_T("########### RKA_Gpt_Download #########"));
 				bRet = RKA_Gpt_Download(rkImageHead.item[i],uiCurrentByte,uiTotalSize);
 				if ( !bRet )
 				{
@@ -1048,12 +1049,15 @@ int CRKAndroidDevice::DownloadImage()
 			if (strcmp(rkImageHead.item[i].name, PARTNAME_RECOVERY) == 0 ||
 				strcmp(rkImageHead.item[i].name, PARTNAME_MISC) == 0)
 			{
-				//chad.ma add for ignore 'recovery' or 'misc' partition update at here.
-				 m_pLog->Record(_T("######Ignore %s download ######\n"), rkImageHead.item[i].name);
-				continue;
+				if (!sdBootUpdate) {
+					//not sdboot update image, we will ignore download partiton.
+					//chad.ma add for ignore 'recovery' or 'misc' partition update at here.
+					m_pLog->Record(_T("\n######Ignore %s download ######\n"), rkImageHead.item[i].name);
+					continue;
+				}
 			}
 
-			m_pLog->Record(_T("###### Download %s ... #######\n"),rkImageHead.item[i].name);
+			m_pLog->Record(_T("###### Download %s ... #######"),rkImageHead.item[i].name);
 
 			if (rkImageHead.item[i].file[55]=='H')
 			{
@@ -1135,9 +1139,12 @@ int CRKAndroidDevice::DownloadImage()
 			if (strcmp(rkImageHead.item[i].name, PARTNAME_RECOVERY) == 0 ||
 				strcmp(rkImageHead.item[i].name, PARTNAME_MISC) == 0)
 			{
-				//chad.ma add for ignore 'recovery' or 'misc' partition check at here.
-				m_pLog->Record(_T("###### Ignore %s Check ######\n"), rkImageHead.item[i].name);
-				continue;
+				if (!sdBootUpdate) {
+					//not sdboot update image , we will ignore check partiton.
+					//chad.ma add for ignore 'recovery' or 'misc' partition check at here.
+					m_pLog->Record(_T("\n###### Ignore %s Check ######\n"), rkImageHead.item[i].name);
+					continue;
+				}
 			}
 
 			if (rkImageHead.item[i].file[55]=='H')
@@ -1338,7 +1345,7 @@ int CRKAndroidDevice::UpgradePartition()
 		}
 		return -13;
 	}
-	uiTotalSize += (8*m_uiParamFileSize);//¼ÓÉÏ²ÎÊýÎÄ¼þÐèÒªµÄ´óÐ¡
+	uiTotalSize += (8*m_uiParamFileSize);//ï¿½ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½Òªï¿½Ä´ï¿½Ð¡
 	m_uiLBATimes = 1;
 	m_pImage->GetMd5Data(fwMd5,fwSignMd5);
 	if (dwFlagSector!=0)
@@ -1610,7 +1617,7 @@ bool CRKAndroidDevice::BufferWriteBack()
 				uiWriteByte = uiTotal;
 
 			memcpy(writeBuf+8,pWriteBackBuffer+uiOffset,uiWriteByte);
-			iRet = m_pComm->RKU_WriteSector(uiOffset,uiWriteByte,writeBuf);
+			iRet = m_pComm->RKU_WriteLBA(64+uiOffset,uiWriteByte,writeBuf);
 			if (iRet!=ERR_SUCCESS)
 			{
 				if (m_pLog)
@@ -1620,7 +1627,7 @@ bool CRKAndroidDevice::BufferWriteBack()
 			uiOffset += uiWriteByte;
 			uiTotal -= uiWriteByte;
 		}
-		iRet = m_pComm->RKU_EndWriteSector((BYTE*)&end_write_sector_data);
+		//iRet = m_pComm->RKU_EndWriteSector((BYTE*)&end_write_sector_data);
 		if (iRet==ERR_SUCCESS)
 			break;
 		nTryCount--;
@@ -1748,7 +1755,7 @@ bool CRKAndroidDevice::RKA_File_Download(STRUCT_RKIMAGE_ITEM &entry,long long &c
 		uifileBufferSize = entry.size;
 	if (m_pLog)
 	{
-		m_pLog->Record(_T(" INFO:Start to download %s,offset=0x%x,size=%llu"),entry.name,entry.flash_offset,uifileBufferSize);
+		m_pLog->Record(_T("INFO:Start to download %s,offset=0x%x,size=%llu"),entry.name,entry.flash_offset,uifileBufferSize);
 	}
 
 	BYTE byRWMethod=RWMETHOD_IMAGE;
@@ -2075,7 +2082,7 @@ bool CRKAndroidDevice::RKA_File_Check(STRUCT_RKIMAGE_ITEM &entry,long long &curr
 }
 
 bool CRKAndroidDevice::RKA_Param_Download(STRUCT_RKIMAGE_ITEM &entry,long long &currentByte,long long totalByte)
-{//Ð´5·Ý²ÎÊýÎÄ¼þ
+{//Ð´5ï¿½Ý²ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 	UINT uiLBATransferSize=(LBA_TRANSFER_SIZE)*m_uiLBATimes;
 	UINT uiLBASector = uiLBATransferSize/SECTOR_SIZE;
 	int  iRet,i;
@@ -2117,7 +2124,7 @@ bool CRKAndroidDevice::RKA_Param_Download(STRUCT_RKIMAGE_ITEM &entry,long long &
 				uiWriteByte = uiLBATransferSize;
 				uiLen = uiLBASector;
 			}
-			iRet = m_pComm->RKU_WriteLBA(uiBegin,uiLen,m_paramBuffer+uiTransfer,byRWMethod);//Ã¿´Î¶¼ÒªÐ´32ÉÈÇø,°´page¶ÔÆë
+			iRet = m_pComm->RKU_WriteLBA(uiBegin,uiLen,m_paramBuffer+uiTransfer,byRWMethod);//Ã¿ï¿½Î¶ï¿½ÒªÐ´32ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½pageï¿½ï¿½ï¿½ï¿½
 			if( iRet!=ERR_SUCCESS )
 			{
 				if (m_pLog)
@@ -2253,7 +2260,6 @@ bool CRKAndroidDevice::RKA_Param_Check(STRUCT_RKIMAGE_ITEM &entry,long long &cur
 	delete []pRead;
 	return true;
 }
-
 
 bool CRKAndroidDevice::RKA_Gpt_Download(STRUCT_RKIMAGE_ITEM &entry,long long &currentByte,long long totalByte)
 {
@@ -2455,7 +2461,7 @@ bool CRKAndroidDevice::MakeParamFileBuffer(STRUCT_RKIMAGE_ITEM &entry)
 		pBuffer = NULL;
 		return false;
 	}
-	//ÅÐ¶ÏÊÇ·ñÒªÐÞ¸ÄParamterÎÄ¼þÄÚÈÝ,ÊÖ»úÉý¼¶ÐèÒª½«paramterÎÄ¼þÖÐµÄpartition²¿·ÖÊý¾Ý¸Ä³ÉÒÔ×Ö½ÚÎªµ¥Î»½øÐÐÆ«ÒÆ
+	//ï¿½Ð¶ï¿½ï¿½Ç·ï¿½Òªï¿½Þ¸ï¿½Paramterï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½paramterï¿½Ä¼ï¿½ï¿½Ðµï¿½partitionï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¸Ä³ï¿½ï¿½ï¿½ï¿½Ö½ï¿½Îªï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
 
 	UINT uiParamSec;
 	if (m_uiParamFileSize%512==0)
@@ -2504,7 +2510,7 @@ bool CRKAndroidDevice::CheckParamPartSize(STRUCT_RKIMAGE_HDR &rkImageHead,int iP
 	{
 		return false;
 	}
-	if (m_uiParamFileSize>rkImageHead.item[iParamPos].part_size/8*512)//ÊÇ·ñÂú×ã´æ·Å8·Ý
+	if (m_uiParamFileSize>rkImageHead.item[iParamPos].part_size/8*512)//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½8ï¿½ï¿½
 	{
 		return false;
 	}
@@ -2637,7 +2643,7 @@ bool CRKAndroidDevice::GetParameterPartSize(STRUCT_RKIMAGE_ITEM &paramItem)
 			continue;
 		}
 		strPartition = strLine.substr(posColon+1);
-		//ÌáÈ¡·ÖÇøÐÅÏ¢
+		//ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 		pos = 0;
 		posComma = strPartition.find(',',pos);
 		while (posComma!=string::npos)
@@ -2930,11 +2936,7 @@ void create_gpt_buffer(u8 *gpt, PARAM_ITEM_VECTOR &vecParts, CONFIG_ITEM_VECTOR 
 			if (strPartName.find(_T("bootable")) != tstring::npos)
 				gptEntry->attributes.raw = PART_PROPERTY_BOOTABLE;
 			if (strPartName.find(_T("grow")) != tstring::npos)
-			{
-				printf("%s: %d  diskSectors = %lld \n",__func__,__LINE__, diskSectors);
 				gptEntry->ending_lba = cpu_to_le64(diskSectors - 34);
-				printf("%s: %d  gptEntry->ending_lba = %lld \n",__func__,__LINE__, gptEntry->ending_lba);
-			}
 			strPartName = strPartName.substr(0,iPos);
 			vecParts[i].szItemName[strPartName.size()] = 0;
 		}
