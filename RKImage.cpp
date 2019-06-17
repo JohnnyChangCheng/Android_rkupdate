@@ -274,7 +274,8 @@ CRKImage::CRKImage(tstring filename,bool &bCheck)
 				printf("Md5Check update.img ulFwSize:%ld", ulFwSize);
 				//bCheck = false;
 				//return;
-				bCheck = true;
+				bCheck = false;
+				return ;
 			}
 		}
 

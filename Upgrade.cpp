@@ -2,6 +2,7 @@
 //#include "RKLog.h"
 //#include "RKComm.h"
 #include "RKAndroidDevice.h"
+#include "Upgrade.h"
 #include <uuid/uuid.h>
 UpgradeCallbackFunc g_callback=NULL;
 UpgradeProgressCallbackFunc g_progress_callback=NULL;
@@ -128,7 +129,7 @@ bool parse_parameter(char *pParameter,PARAM_ITEM_VECTOR &vecItem)
 			continue;
 		}
 		strPartition = strLine.substr(posColon+1);
-		//提取分区信息
+		//锟斤拷取锟斤拷锟斤拷锟斤拷息
 		pos = 0;
 		posComma = strPartition.find(',',pos);
 		while (posComma!=string::npos)
@@ -183,7 +184,7 @@ bool get_parameter_loader( CRKComm *pComm,char *pParameter, int &nParamSize)
 		return false;
 	}
 	if (nParamSize==-1)
-	{//获取parameter大小
+	{//锟斤拷取parameter锟斤拷小
 		nParamSize = *pParamSize;
 		return true;
 	}
@@ -708,7 +709,7 @@ bool UnlockDevice(CRKImage *pImage,CRKLog *pLog,unsigned char *pKey,unsigned int
 }
 
 extern int sdBootUpdate;
-bool do_rk_firmware_upgrade(char *szFw,void *pCallback,void *pProgressCallback,char *szBootDev)
+int do_rk_firmware_upgrade(char *szFw,void *pCallback,void *pProgressCallback,char *szBootDev)
 {
 	bool bSuccess=false,bRet=false,bLock;
 	int iRet;
@@ -735,7 +736,7 @@ bool do_rk_firmware_upgrade(char *szFw,void *pCallback,void *pProgressCallback,c
 	if (!bRet)
 	{
 		pLog->Record("ERROR:do_rk_firmware_upgrade-->new CRKImage failed!");
-		goto EXIT_UPGRADE;
+		goto EXIT_CHECKFAILED;
 	}
 	pComm = new CRKUsbComm(pLog);
 	if (!pComm)
@@ -892,6 +893,8 @@ EXIT_UPGRADE:
 	}
 
 	return bSuccess;
+EXIT_CHECKFAILED:
+	return CHECK_FAILED;
 }
 bool do_rk_partition_upgrade(char *szFw,void *pCallback,void *pProgressCallback,char nBoot,char *szBootDev)
 {

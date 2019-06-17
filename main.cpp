@@ -42,7 +42,9 @@ int main(int argc, char *argv[]){
     sdBootUpdate = atoi(argv[4]);
 
     //call update
-    bool bRet = do_rk_firmware_upgrade(filepath, (void *)handle_upgrade_callback, (void *)handle_upgrade_progress_callback);
+    int bRet = do_rk_firmware_upgrade(filepath, (void *)handle_upgrade_callback, (void *)handle_upgrade_progress_callback);
+    if(bRet == CHECK_FAILED)
+        exit (CHECK_FAILED);
     int status;
     if(!bRet)
         status = INSTALL_ERROR;
